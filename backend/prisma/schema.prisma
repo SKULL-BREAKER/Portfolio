@@ -1,0 +1,180 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  role      Role     @default(VISITOR)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  profile   Profile?
+}
+
+enum Role {
+  OWNER
+  VISITOR
+}
+
+model Profile {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  headline        String?
+  about           String?  @db.Text
+  careerObjective String?  @db.Text
+  profileImage    String?
+  resumeFile      String?  @db.VarChar(512)
+  resumeOriginal  String?  @db.VarChar(512)
+  resumeDownloads Boolean  @default(false)
+  isPublic        Boolean  @default(true)
+  status          String?  @default("Available for opportunities")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  projects        Project[]
+  skills          Skill[]
+  education       Education[]
+  experience      Experience[]
+  certificates    Certificate[]
+  achievements    Achievement[]
+  socialLinks     SocialLink[]
+}
+
+model SocialLink {
+  id           String   @id @default(uuid())
+  profileId    String
+  profile      Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  platform     String
+  displayName  String
+  url          String
+  icon         String?
+  description  String?
+  displayOrder Int      @default(0)
+  isPublic     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Project {
+  id               String   @id @default(uuid())
+  profileId        String
+  profile          Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  slug             String   @unique
+  title            String
+  shortDescription String
+  description      String   @db.Text
+  image            String?
+  githubUrl        String?
+  liveUrl          String?
+  documentationUrl String?
+  technologies     String   // Comma separated or JSON string
+  category         String?
+  startDate        DateTime?
+  endDate          DateTime?
+  status           String?
+  isFeatured       Boolean  @default(false)
+  displayOrder     Int      @default(0)
+  isPublic         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Skill {
+  id           String   @id @default(uuid())
+  profileId    String
+  profile      Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  name         String
+  category     String
+  proficiency  String?
+  yearsOfExp   Float?
+  icon         String?
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Certificate {
+  id                   String   @id @default(uuid())
+  profileId            String
+  profile              Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  title                String
+  organization         String
+  issueDate            DateTime
+  credentialId         String?
+  credentialUrl        String?
+  description          String?  @db.Text
+  fileUrl              String   @db.VarChar(512)
+  originalFileName     String   @db.VarChar(512)
+  mimeType             String
+  sizeBytes            Int
+  displayOrder         Int      @default(0)
+  isPublic             Boolean  @default(true)
+  allowDownload        Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model Education {
+  id             String   @id @default(uuid())
+  profileId      String
+  profile        Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  institution    String
+  degree         String
+  department     String?
+  startDate      DateTime
+  endDate        DateTime?
+  grade          String?
+  description    String?  @db.Text
+  institutionUrl String?
+  achievements   String?  @db.Text
+  displayOrder   Int      @default(0)
+  isPublic       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Experience {
+  id             String   @id @default(uuid())
+  profileId      String
+  profile        Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  company        String
+  position       String
+  startDate      DateTime
+  endDate        DateTime?
+  isCurrent      Boolean  @default(false)
+  description    String?  @db.Text
+  companyUrl     String?
+  displayOrder   Int      @default(0)
+  isPublic       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Achievement {
+  id           String   @id @default(uuid())
+  profileId    String
+  profile      Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  title        String
+  description  String?  @db.Text
+  date         DateTime?
+  displayOrder Int      @default(0)
+  isPublic     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// Session model for connect-session-sequelize or express-session
+model Session {
+  id        String   @id
+  sid       String   @unique
+  data      String   @db.Text
+  expiresAt DateTime
+}

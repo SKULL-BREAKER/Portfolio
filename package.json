@@ -1,0 +1,11 @@
+{
+  "name": "portfolio-system",
+  "version": "1.0.0",
+  "description": "Secure Portfolio System",
+  "private": true,
+  "scripts": {
+    "postinstall": "npm --prefix backend install && npm --prefix frontend install",
+    "build": "npm --prefix frontend run build",
+    "start": "npm --prefix backend start"
+  }
+}

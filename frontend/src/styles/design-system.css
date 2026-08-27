@@ -1,0 +1,276 @@
+:root {
+  /* Premium Ruby & Metallic Silver Theme */
+  --bg-primary: #1a0508;     /* Ultra-deep ruby background */
+  --bg-secondary: #2d0a11;   /* Rich dark red for sections */
+  --bg-tertiary: #4a111a;    /* Lighter red accent */
+  
+  --text-primary: #ffffff;
+  --text-secondary: #e0e5ec;
+  --text-tertiary: #b0b8c4;
+  
+  --primary-color: #e2e8f0;  /* Bright metallic silver */
+  --secondary-color: #94a3b8; /* Brushed steel */
+  --accent-brass: #cbd5e1;    
+  --accent-highlight: #ffffff;
+  
+  --border-color: rgba(226, 232, 240, 0.15); /* Subtle silver border */
+  --border-red: rgba(226, 232, 240, 0.3);
+  --border-hover: rgba(226, 232, 240, 0.6);
+  
+  /* Typography - Modern & Clean */
+  --font-primary: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+  
+  /* Grid & Layout */
+  --max-width: 1200px;
+  --grid-gap: 2rem;
+  
+  /* Radii */
+  --radius-sm: 2px; /* Sharper cyber corners */
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  
+  /* Transitions */
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg-primary);
+  background: radial-gradient(circle at top right, var(--bg-secondary) 0%, var(--bg-primary) 60%),
+              radial-gradient(circle at bottom left, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+  color: var(--text-primary);
+  font-family: var(--font-primary);
+  line-height: 1.7;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-top: 0;
+  margin-bottom: var(--space-4);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+h1 {
+  text-shadow: 0 0 20px rgba(255,255,255,0.2);
+}
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+a:hover {
+  color: var(--accent-highlight);
+  text-shadow: 0 0 12px rgba(255,255,255,0.4);
+}
+
+/* Technical grid background */
+.bg-grid {
+  background-size: 50px 50px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  mask-image: linear-gradient(to bottom, black 20%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 20%, transparent 100%);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+  position: relative;
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding: 0 var(--space-8);
+  }
+}
+
+/* Premium Silver Glassmorphism Card */
+.premium-card {
+  background: linear-gradient(135deg, rgba(226, 232, 240, 0.08), rgba(148, 163, 184, 0.03));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.15);
+  border-top: 1px solid rgba(226, 232, 240, 0.3);
+  border-left: 1px solid rgba(226, 232, 240, 0.3);
+  border-radius: 16px;
+  padding: var(--space-8);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+              box-shadow 0.4s ease, border-color 0.4s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+/* Subtle inner shine */
+.premium-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle at top left, rgba(255,255,255,0.1), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.premium-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.premium-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(226, 232, 240, 0.4);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7), 
+              0 0 20px rgba(226, 232, 240, 0.1) inset;
+}
+
+/* Button styles */
+/* Premium Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 28px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  border-radius: 30px; /* Pill shape for modern look */
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Metallic Silver Button */
+.btn-primary {
+  background: var(--primary-color);
+  color: var(--bg-primary);
+  border: none;
+  box-shadow: 0 4px 15px rgba(226, 232, 240, 0.2);
+  font-weight: 600;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.2);
+  box-shadow: 0 8px 25px rgba(226, 232, 240, 0.4), 
+              0 0 15px rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px) scale(1.02);
+}
+
+/* Ghost Silver Button */
+.btn-secondary {
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 1px solid rgba(226, 232, 240, 0.3);
+  backdrop-filter: blur(4px);
+}
+
+.btn-secondary:hover {
+  border-color: var(--primary-color);
+  background-color: rgba(226, 232, 240, 0.1);
+  box-shadow: 0 0 20px rgba(226, 232, 240, 0.2);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+/* Input Fields - Frosted Glass */
+input, select, textarea {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(226, 232, 240, 0.1) !important;
+  color: var(--text-primary) !important;
+  border-radius: 8px !important;
+  padding: 12px 16px !important;
+  transition: all 0.3s ease !important;
+  backdrop-filter: blur(8px);
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: rgba(226, 232, 240, 0.5) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 0 0 3px rgba(226, 232, 240, 0.15) !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: rgba(226, 232, 240, 0.4) !important;
+}
+
+/* Premium Header */
+header {
+  background: color-mix(in srgb, var(--bg-primary) 70%, transparent) !important;
+  backdrop-filter: blur(20px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.1) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Global Jumping Effect for Non-Text Interactive Elements */
+.premium-card, .btn, input, textarea, select, img {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, border-color 0.4s ease !important;
+}
+
+.premium-card:hover, 
+.btn-secondary:hover, 
+input:hover, 
+input:focus, 
+textarea:hover, 
+textarea:focus, 
+select:hover, 
+select:focus, 
+img:hover {
+  transform: translateY(-8px) !important;
+}
+
+.btn-primary:hover {
+  transform: translateY(-8px) scale(1.02) !important;
+}

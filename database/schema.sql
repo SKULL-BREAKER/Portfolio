@@ -1,0 +1,150 @@
+-- Production-Grade Portfolio Database Schema
+
+CREATE TABLE IF NOT EXISTS Users (
+    id VARCHAR(36) PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(255),
+    role ENUM('OWNER', 'VISITOR') DEFAULT 'VISITOR',
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS Profiles (
+    id VARCHAR(36) PRIMARY KEY,
+    userId VARCHAR(36) UNIQUE NOT NULL,
+    headline VARCHAR(255),
+    about TEXT,
+    careerObjective TEXT,
+    profileImage VARCHAR(255),
+    resumeFile VARCHAR(512),
+    resumeOriginal VARCHAR(512),
+    resumeDownloads BOOLEAN DEFAULT FALSE,
+    isPublic BOOLEAN DEFAULT TRUE,
+    themeSettings TEXT,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS SocialLinks (
+    id VARCHAR(36) PRIMARY KEY,
+    profileId VARCHAR(36) NOT NULL,
+    platform VARCHAR(100) NOT NULL,
+    displayName VARCHAR(255) NOT NULL,
+    url VARCHAR(512) NOT NULL,
+    icon VARCHAR(100),
+    description TEXT,
+    displayOrder INT DEFAULT 0,
+    isPublic BOOLEAN DEFAULT TRUE,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (profileId) REFERENCES Profiles(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Projects (
+    id VARCHAR(36) PRIMARY KEY,
+    profileId VARCHAR(36) NOT NULL,
+    slug VARCHAR(255) UNIQUE NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    shortDescription VARCHAR(512) NOT NULL,
+    description TEXT NOT NULL,
+    image VARCHAR(512),
+    githubUrl VARCHAR(512),
+    liveUrl VARCHAR(512),
+    documentationUrl VARCHAR(512),
+    technologies TEXT NOT NULL,
+    category VARCHAR(100),
+    startDate DATE,
+    endDate DATE,
+    status VARCHAR(100),
+    isFeatured BOOLEAN DEFAULT FALSE,
+    displayOrder INT DEFAULT 0,
+    isPublic BOOLEAN DEFAULT TRUE,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (profileId) REFERENCES Profiles(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Skills (
+    id VARCHAR(36) PRIMARY KEY,
+    profileId VARCHAR(36) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    proficiency VARCHAR(100),
+    yearsOfExp FLOAT,
+    icon VARCHAR(100),
+    displayOrder INT DEFAULT 0,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (profileId) REFERENCES Profiles(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Certificates (
+    id VARCHAR(36) PRIMARY KEY,
+    profileId VARCHAR(36) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    organization VARCHAR(255) NOT NULL,
+    issueDate DATE NOT NULL,
+    credentialId VARCHAR(255),
+    credentialUrl VARCHAR(512),
+    description TEXT,
+    fileUrl VARCHAR(512) NOT NULL,
+    originalFileName VARCHAR(512) NOT NULL,
+    mimeType VARCHAR(100) NOT NULL,
+    sizeBytes INT NOT NULL,
+    displayOrder INT DEFAULT 0,
+    isPublic BOOLEAN DEFAULT TRUE,
+    allowDownload BOOLEAN DEFAULT TRUE,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (profileId) REFERENCES Profiles(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Education (
+    id VARCHAR(36) PRIMARY KEY,
+    profileId VARCHAR(36) NOT NULL,
+    institution VARCHAR(255) NOT NULL,
+    degree VARCHAR(255) NOT NULL,
+    department VARCHAR(255),
+    startDate DATE NOT NULL,
+    endDate DATE,
+    grade VARCHAR(100),
+    description TEXT,
+    institutionUrl VARCHAR(512),
+    achievements TEXT,
+    displayOrder INT DEFAULT 0,
+    isPublic BOOLEAN DEFAULT TRUE,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (profileId) REFERENCES Profiles(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Experience (
+    id VARCHAR(36) PRIMARY KEY,
+    profileId VARCHAR(36) NOT NULL,
+    company VARCHAR(255) NOT NULL,
+    position VARCHAR(255) NOT NULL,
+    startDate DATE NOT NULL,
+    endDate DATE,
+    isCurrent BOOLEAN DEFAULT FALSE,
+    description TEXT,
+    companyUrl VARCHAR(512),
+    displayOrder INT DEFAULT 0,
+    isPublic BOOLEAN DEFAULT TRUE,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (profileId) REFERENCES Profiles(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Achievements (
+    id VARCHAR(36) PRIMARY KEY,
+    profileId VARCHAR(36) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    date DATE,
+    displayOrder INT DEFAULT 0,
+    isPublic BOOLEAN DEFAULT TRUE,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (profileId) REFERENCES Profiles(id) ON DELETE CASCADE
+);
