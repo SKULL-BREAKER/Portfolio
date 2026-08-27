@@ -29,7 +29,6 @@ const VisitorLayout: React.FC = () => {
             fontWeight: 600,
             letterSpacing: '0.05em' 
           }}>
-
             PORTFOLIO
           </Link>
           
