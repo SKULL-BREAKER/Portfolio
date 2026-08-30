@@ -28,7 +28,6 @@ const AnimatedBackground: React.FC = () => {
     mazeCtx.fillStyle = bgColor;
     mazeCtx.fillRect(0, 0, width, height);
 
-    // Convert hex string to rgba for softer drawing
     const hexToRgba = (hex: string, alpha: number) => {
       if (!hex || hex.startsWith('var')) return `rgba(255, 255, 255, ${alpha})`;
       let r = 0, g = 0, b = 0;
@@ -45,32 +44,30 @@ const AnimatedBackground: React.FC = () => {
     };
 
     const baseColor = theme?.mazeColor || theme?.primaryColor || '#e2e8f0';
-    const lineColor = hexToRgba(baseColor, 0.1);
-    
-    // The ball glows bright!
+    const lineColor = hexToRgba(baseColor, 0.15);
     const ballColor = hexToRgba(baseColor, 1);
-    const ballGlowColor = hexToRgba(baseColor, 0.5);
 
     mazeCtx.strokeStyle = lineColor;
-    mazeCtx.lineWidth = 1.5;
+    mazeCtx.lineWidth = 1;
     mazeCtx.lineCap = 'round';
-    mazeCtx.lineJoin = 'round';
 
-    const cellSize = 15;
-    const cols = Math.floor(width / cellSize) + 2;
-    const rows = Math.floor(height / cellSize) + 2;
+    const cellSize = 20;
+    const cols = Math.floor(width / cellSize);
+    const rows = Math.floor(height / cellSize);
 
     class Cell {
       i: number;
       j: number;
       visited: boolean;
-      connected: Cell[]; // Keeps track of valid paths for the ball
+      connected: Cell[]; 
+      walls: boolean[]; // top, right, bottom, left
 
       constructor(i: number, j: number) {
         this.i = i;
         this.j = j;
         this.visited = false;
         this.connected = [];
+        this.walls = [true, true, true, true];
       }
 
       checkNeighbors() {
@@ -99,6 +96,15 @@ const AnimatedBackground: React.FC = () => {
       return i + j * cols;
     }
 
+    function removeWalls(a: Cell, b: Cell) {
+      let x = a.i - b.i;
+      if (x === 1) { a.walls[3] = false; b.walls[1] = false; }
+      else if (x === -1) { a.walls[1] = false; b.walls[3] = false; }
+      let y = a.j - b.j;
+      if (y === 1) { a.walls[0] = false; b.walls[2] = false; }
+      else if (y === -1) { a.walls[2] = false; b.walls[0] = false; }
+    }
+
     let grid: Cell[] = [];
     
     const generateMaze = () => {
@@ -113,43 +119,69 @@ const AnimatedBackground: React.FC = () => {
       current.visited = true;
       const stack: Cell[] = [];
       
-      // Build the static maze
+      // 1. Build the perfect maze (DFS)
       while (true) {
         const next = current.checkNeighbors();
         if (next) {
           next.visited = true;
           
-          // Save the path connection for the ball to follow later
+          removeWalls(current, next);
           current.connected.push(next);
           next.connected.push(current);
           
           stack.push(current);
-          
-          mazeCtx.beginPath();
-          mazeCtx.moveTo(current.i * cellSize + cellSize/2, current.j * cellSize + cellSize/2);
-          mazeCtx.lineTo(next.i * cellSize + cellSize/2, next.j * cellSize + cellSize/2);
-          mazeCtx.stroke();
-
           current = next;
         } else if (stack.length > 0) {
           current = stack.pop()!;
         } else {
-          break; // Maze finished building
+          break; 
         }
       }
+
+      // 2. Convert to a "Braid Maze" by removing all dead ends
+      // This ensures the ball NEVER has to reverse!
+      for (let i = 0; i < grid.length; i++) {
+        const cell = grid[i];
+        if (cell.connected.length === 1) {
+          let top = grid[index(cell.i, cell.j - 1)];
+          let right = grid[index(cell.i + 1, cell.j)];
+          let bottom = grid[index(cell.i, cell.j + 1)];
+          let left = grid[index(cell.i - 1, cell.j)];
+          
+          let disconnected = [];
+          if (top && !cell.connected.includes(top)) disconnected.push(top);
+          if (right && !cell.connected.includes(right)) disconnected.push(right);
+          if (bottom && !cell.connected.includes(bottom)) disconnected.push(bottom);
+          if (left && !cell.connected.includes(left)) disconnected.push(left);
+          
+          if (disconnected.length > 0) {
+            let neighbor = disconnected[Math.floor(Math.random() * disconnected.length)];
+            removeWalls(cell, neighbor);
+            cell.connected.push(neighbor);
+            neighbor.connected.push(cell);
+          }
+        }
+      }
+
+      // 3. Draw the walls!
+      mazeCtx.beginPath();
+      for (let i = 0; i < grid.length; i++) {
+        const cell = grid[i];
+        const x = cell.i * cellSize;
+        const y = cell.j * cellSize;
+
+        if (cell.walls[0]) { mazeCtx.moveTo(x, y); mazeCtx.lineTo(x + cellSize, y); } // Top
+        if (cell.walls[1]) { mazeCtx.moveTo(x + cellSize, y); mazeCtx.lineTo(x + cellSize, y + cellSize); } // Right
+        if (cell.walls[2]) { mazeCtx.moveTo(x, y + cellSize); mazeCtx.lineTo(x + cellSize, y + cellSize); } // Bottom
+        if (cell.walls[3]) { mazeCtx.moveTo(x, y); mazeCtx.lineTo(x, y + cellSize); } // Left
+      }
+      mazeCtx.stroke();
     };
 
     generateMaze();
 
     // --- BALL ANIMATION ---
-    
-    // Pick a random starting point
     let currentBallCell = grid[Math.floor(Math.random() * grid.length)];
-    // Ensure the starting cell has connections
-    while (currentBallCell.connected.length === 0) {
-       currentBallCell = grid[Math.floor(Math.random() * grid.length)];
-    }
-    
     let nextBallCell = currentBallCell.connected[Math.floor(Math.random() * currentBallCell.connected.length)];
     let prevBallCell: Cell | null = null;
     let progress = 0;
@@ -158,7 +190,7 @@ const AnimatedBackground: React.FC = () => {
     const drawBall = () => {
       ballCtx.clearRect(0, 0, width, height);
 
-      // Calculate exact pixel position
+      // The point travels exactly IN BETWEEN the lines (at the center of the cells)
       const startX = currentBallCell.i * cellSize + cellSize/2;
       const startY = currentBallCell.j * cellSize + cellSize/2;
       const endX = nextBallCell.i * cellSize + cellSize/2;
@@ -182,14 +214,13 @@ const AnimatedBackground: React.FC = () => {
         prevBallCell = currentBallCell;
         currentBallCell = nextBallCell;
         
-        // Pick next destination (try to avoid going immediately backwards unless it's a dead end)
+        // Pick next destination and NEVER take reverse
         let possibleNext = currentBallCell.connected.filter(c => c !== prevBallCell);
         
         if (possibleNext.length === 0) {
-          // Dead end, must turn around
+          // Should never happen in a perfect Braid Maze, but fallback just in case
           nextBallCell = prevBallCell;
         } else {
-          // Pick randomly from available forward paths
           nextBallCell = possibleNext[Math.floor(Math.random() * possibleNext.length)];
         }
       }
@@ -211,18 +242,14 @@ const AnimatedBackground: React.FC = () => {
       mazeCtx.fillStyle = bgColor;
       mazeCtx.fillRect(0, 0, width, height);
       mazeCtx.strokeStyle = lineColor;
-      mazeCtx.lineWidth = 1.5;
+      mazeCtx.lineWidth = 1;
       mazeCtx.lineCap = 'round';
-      mazeCtx.lineJoin = 'round';
       
       generateMaze();
       
-      // Reset ball position
       currentBallCell = grid[Math.floor(Math.random() * grid.length)];
-      while (currentBallCell.connected.length === 0) {
-         currentBallCell = grid[Math.floor(Math.random() * grid.length)];
-      }
       nextBallCell = currentBallCell.connected[Math.floor(Math.random() * currentBallCell.connected.length)];
+      prevBallCell = null;
       progress = 0;
     };
 
