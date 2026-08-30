@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { ArrowRight, Shield, Zap, Globe, LayoutTemplate } from 'lucide-react';
+import { ArrowRight, Zap, Globe, LayoutTemplate } from 'lucide-react';
 import { Link, Navigate } from 'react-router-dom';
+import Logo from '../components/Logo';
 
 const Landing: React.FC = () => {
   const { loginWithEmail, loginWithGoogle, isAuthenticated } = useAuth();
@@ -38,7 +39,7 @@ const Landing: React.FC = () => {
         borderBottom: '1px solid rgba(255,255,255,0.05)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold', fontSize: '1.25rem', fontFamily: 'var(--font-mono)', letterSpacing: '0.05em' }}>
-          <Shield style={{ color: '#3b82f6' }} />
+          <Logo size={28} color="#3b82f6" />
           <span>PORTFOLIO</span>
         </div>
         <Link to="/admin" style={{

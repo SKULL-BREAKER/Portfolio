@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { LogOut, LayoutDashboard, User, FolderGit2, Award, Briefcase, GraduationCap, Link as LinkIcon } from 'lucide-react';
+import Logo from '../../components/Logo';
 
 const OwnerLayout: React.FC = () => {
   const { logout } = useAuth();
@@ -19,8 +20,12 @@ const OwnerLayout: React.FC = () => {
           <Link to="/" style={{ 
             fontFamily: 'var(--font-mono)', 
             fontWeight: 600,
-            fontSize: 'var(--text-lg)'
+            fontSize: 'var(--text-lg)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px'
           }}>
+            <Logo size={24} color="var(--primary-color)" />
             SYSTEM ADMIN
           </Link>
         </div>

@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Outlet, Link, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import Logo from '../../components/Logo';
 
 const VisitorLayout: React.FC = () => {
   const { isAuthenticated, role } = useAuth();
@@ -43,6 +44,7 @@ const VisitorLayout: React.FC = () => {
             fontWeight: 600,
             letterSpacing: '0.05em' 
           }}>
+            <Logo size={24} color="var(--primary-color)" />
             PORTFOLIO
           </Link>
           
