@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useTheme } from '../../context/ThemeContext';
+import Cropper from 'react-easy-crop';
+import { getCroppedImg } from '../../utils/cropImage';
 
 interface ProfileData {
   name: string;
@@ -46,6 +48,13 @@ const Profile: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const { updateTheme } = useTheme();
+
+  // Cropper State
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [isCropping, setIsCropping] = useState(false);
+  const [tempImageSrc, setTempImageSrc] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProfile();
@@ -164,6 +173,63 @@ const Profile: React.FC = () => {
 
   return (
     <div>
+      {/* CROPPER MODAL */}
+      {isCropping && tempImageSrc && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999,
+          backgroundColor: 'rgba(0,0,0,0.9)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <h3 style={{ color: '#fff', marginBottom: '1rem' }}>Adjust Profile Photo</h3>
+          <div style={{ position: 'relative', width: '90%', maxWidth: '500px', height: '60vh', background: '#333', borderRadius: '12px', overflow: 'hidden' }}>
+            <Cropper
+              image={tempImageSrc}
+              crop={crop}
+              zoom={zoom}
+              aspect={1}
+              cropShape="round"
+              showGrid={false}
+              onCropChange={setCrop}
+              onZoomChange={setZoom}
+              onCropComplete={(_, croppedPixels) => {
+                setCroppedAreaPixels(croppedPixels as any);
+              }}
+            />
+          </div>
+          <div style={{ marginTop: '20px', display: 'flex', gap: '20px' }}>
+            <button 
+              type="button" 
+              className="btn btn-secondary"
+              onClick={() => {
+                setIsCropping(false);
+                setTempImageSrc(null);
+              }}
+            >
+              Cancel
+            </button>
+            <button 
+              type="button" 
+              className="btn btn-primary"
+              onClick={async () => {
+                try {
+                  const croppedBlob = await getCroppedImg(tempImageSrc, croppedAreaPixels as any);
+                  if (croppedBlob) {
+                    const file = new File([croppedBlob], 'profile.jpg', { type: 'image/jpeg' });
+                    setImageFile(file);
+                    // Preview the cropped image instantly
+                    setProfile(prev => ({ ...prev, profileImage: URL.createObjectURL(file) }));
+                  }
+                } catch (e) {
+                  console.error(e);
+                }
+                setIsCropping(false);
+              }}
+            >
+              Apply Crop
+            </button>
+          </div>
+        </div>
+      )}
+
       <h2 style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-6)' }}>
         Manage Profile
       </h2>
@@ -197,7 +263,15 @@ const Profile: React.FC = () => {
               accept="image/*"
               onChange={(e) => {
                 if (e.target.files && e.target.files.length > 0) {
-                  setImageFile(e.target.files[0]);
+                  const file = e.target.files[0];
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    setTempImageSrc(reader.result as string);
+                    setIsCropping(true);
+                  };
+                  reader.readAsDataURL(file);
+                  // Reset input value so same file can be selected again
+                  e.target.value = '';
                 }
               }}
               style={{ 
