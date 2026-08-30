@@ -23,7 +23,7 @@ const Landing: React.FC = () => {
   return (
     <div style={{ 
       minHeight: '100vh', 
-      backgroundColor: '#0a0a0a', 
+      backgroundColor: 'transparent', 
       color: '#fff',
       fontFamily: 'Inter, system-ui, sans-serif'
     }}>
@@ -37,9 +37,9 @@ const Landing: React.FC = () => {
         margin: '0 auto',
         borderBottom: '1px solid rgba(255,255,255,0.05)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold', fontSize: '1.25rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold', fontSize: '1.25rem', fontFamily: 'var(--font-mono)', letterSpacing: '0.05em' }}>
           <Shield style={{ color: '#3b82f6' }} />
-          <span>FolioMaker</span>
+          <span>PORTFOLIO</span>
         </div>
         <Link to="/admin" style={{
           padding: '0.5rem 1.25rem',
