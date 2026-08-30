@@ -1,9 +1,0 @@
-{
-  "name": "portfolio-system",
-  "version": "1.0.0",
-  "description": "Secure Portfolio System",
-  "private": true,
-  "scripts": {
-    "build": "npm --prefix frontend run build"
-  }
-}
