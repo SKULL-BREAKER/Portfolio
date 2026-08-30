@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Link, useParams, Navigate } from 'react-router-dom';
-import { ArrowRight, Download, FolderGit2, Mail, Link as LinkIcon } from 'lucide-react';
+import { ArrowRight, Download, FolderGit2, Mail, Link as LinkIcon, X } from 'lucide-react';
 
 
 const Home: React.FC = () => {
@@ -10,6 +10,7 @@ const Home: React.FC = () => {
   const [links, setLinks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -101,6 +102,7 @@ const Home: React.FC = () => {
               <img 
                 src={profile.profileImage} 
                 alt="Profile"
+                onClick={() => setIsImageModalOpen(true)}
                 style={{
                   width: 'min(80px, 12vw)',
                   height: 'min(80px, 12vw)',
@@ -108,7 +110,8 @@ const Home: React.FC = () => {
                   objectFit: 'cover',
                   border: '2px solid var(--border-color)',
                   boxShadow: '0 0 15px rgba(226, 232, 240, 0.2)',
-                  flexShrink: 0
+                  flexShrink: 0,
+                  cursor: 'pointer'
                 }}
               />
             )}
@@ -159,6 +162,59 @@ const Home: React.FC = () => {
           </div>
         </section>
         
+        {/* PROFILE IMAGE FULLSCREEN MODAL */}
+        {isImageModalOpen && profile?.profileImage && (
+          <div 
+            onClick={() => setIsImageModalOpen(false)}
+            style={{
+              position: 'fixed',
+              top: 0, left: 0, right: 0, bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.85)',
+              backdropFilter: 'blur(8px)',
+              zIndex: 9999,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              cursor: 'zoom-out'
+            }}
+          >
+            <button 
+              onClick={() => setIsImageModalOpen(false)}
+              style={{
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                background: 'rgba(255, 255, 255, 0.1)',
+                border: 'none',
+                color: '#fff',
+                cursor: 'pointer',
+                padding: '8px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'background 0.2s'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'}
+              onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
+            >
+              <X size={24} />
+            </button>
+            <img 
+              src={profile.profileImage} 
+              alt="Profile Full"
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                maxWidth: '90vw',
+                maxHeight: '90vh',
+                objectFit: 'contain',
+                borderRadius: '8px',
+                boxShadow: '0 0 40px rgba(0,0,0,0.5)',
+                cursor: 'default'
+              }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
