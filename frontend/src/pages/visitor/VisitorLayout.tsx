@@ -59,7 +59,7 @@ const VisitorLayout: React.FC = () => {
         <Outlet />
       </main>
       
-      <footer style={{ borderTop: '1px solid var(--border-color)', padding: 'var(--space-8) 0' }}>
+      <footer style={{ padding: 'var(--space-8) 0' }}>
         <div className="container" style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', color: 'var(--text-tertiary)', fontSize: 'var(--text-xs)', fontFamily: 'var(--font-mono)' }}>
           <span>&copy; {new Date().getFullYear()} Secure Portfolio System</span>
           <span>SYSTEM STATUS: ONLINE</span>
