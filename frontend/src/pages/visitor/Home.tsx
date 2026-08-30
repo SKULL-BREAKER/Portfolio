@@ -107,7 +107,7 @@ const Home: React.FC = () => {
                 }}
               />
             )}
-            {profile?.name || 'Nanthakumar.T'}
+            {profile?.name || profile?.username || 'Anonymous'}
           </h1>
           
           <p style={{ 
