@@ -75,13 +75,14 @@ const Landing: React.FC = () => {
           gap: '0.5rem',
           padding: '0.5rem 1rem',
           borderRadius: '9999px',
-          backgroundColor: 'rgba(59, 130, 246, 0.1)',
-          color: '#3b82f6',
+          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+          color: '#fff',
           fontSize: '0.875rem',
           fontWeight: 500,
-          marginBottom: '2rem'
+          marginBottom: '2rem',
+          border: '1px solid rgba(255, 255, 255, 0.1)'
         }}>
-          <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#3b82f6' }}></span>
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#fff' }}></span>
           Be yourself.
         </div>
 
