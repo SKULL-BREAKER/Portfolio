@@ -100,7 +100,8 @@ const Home: React.FC = () => {
             fontSize: 'var(--text-lg)', 
             color: 'var(--text-tertiary)',
             maxWidth: '600px',
-            marginBottom: 'var(--space-8)'
+            marginBottom: 'var(--space-8)',
+            whiteSpace: 'pre-wrap'
           }}>
             {profile?.about}
           </p>
