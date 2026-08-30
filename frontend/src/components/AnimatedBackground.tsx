@@ -167,16 +167,10 @@ const AnimatedBackground: React.FC = () => {
       const currentX = startX + (endX - startX) * progress;
       const currentY = startY + (endY - startY) * progress;
 
-      // Draw ball
+      // Draw tiny point ball
       ballCtx.beginPath();
-      ballCtx.arc(currentX, currentY, 3, 0, Math.PI * 2);
+      ballCtx.arc(currentX, currentY, 1.5, 0, Math.PI * 2);
       ballCtx.fillStyle = ballColor;
-      ballCtx.fill();
-      
-      // Add glow
-      ballCtx.beginPath();
-      ballCtx.arc(currentX, currentY, 8, 0, Math.PI * 2);
-      ballCtx.fillStyle = ballGlowColor;
       ballCtx.fill();
 
       // Move progress
