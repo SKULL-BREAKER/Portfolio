@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { useTheme } from '../../context/ThemeContext';
 
 interface ProfileData {
+  name: string;
   username: string;
   headline: string;
   about: string;
@@ -22,6 +23,7 @@ interface ProfileData {
 
 const Profile: React.FC = () => {
   const [profile, setProfile] = useState<ProfileData>({
+    name: '',
     username: '',
     headline: '',
     about: '',
@@ -55,6 +57,7 @@ const Profile: React.FC = () => {
       const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
       if (data) {
         setProfile({
+          name: data.name || '',
           username: data.username || '',
           headline: data.headline || '',
           about: data.about || '',
@@ -124,6 +127,7 @@ const Profile: React.FC = () => {
       }
 
       const payload = {
+        name: profile.name,
         username: profile.username,
         headline: profile.headline,
         about: profile.about,
@@ -226,7 +230,25 @@ const Profile: React.FC = () => {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-            <label style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>Username (Your Public Link)</label>
+            <label style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>Display Name (Shows on your page)</label>
+            <input 
+              type="text" 
+              name="name"
+              value={profile.name}
+              onChange={handleChange}
+              style={{ 
+                padding: 'var(--space-3)', 
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--border-color)',
+                backgroundColor: 'rgba(0,0,0,0.2)',
+                color: 'var(--text-primary)'
+              }}
+              placeholder="e.g. John Doe"
+            />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+            <label style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>Personal URL (Username)</label>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span style={{ color: 'var(--text-tertiary)' }}>domain.com/</span>
               <input 
