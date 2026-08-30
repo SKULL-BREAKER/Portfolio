@@ -12,6 +12,7 @@ import Login from './pages/Login';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import AnimatedBackground from './components/AnimatedBackground';
 
 import Profile from './pages/owner/Profile';
 import Projects from './pages/owner/Projects';
@@ -26,6 +27,7 @@ function App() {
   return (
     <AuthProvider>
       <ThemeProvider>
+        <AnimatedBackground />
         <Router>
           <Routes>
             {/* Landing Route for SaaS Platform */}

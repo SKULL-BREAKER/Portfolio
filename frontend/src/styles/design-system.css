@@ -65,8 +65,6 @@ html {
 
 body {
   background-color: var(--bg-primary);
-  background: radial-gradient(circle at top right, var(--bg-secondary) 0%, var(--bg-primary) 60%),
-              radial-gradient(circle at bottom left, var(--bg-secondary) 0%, var(--bg-primary) 100%);
   color: var(--text-primary);
   font-family: var(--font-primary);
   line-height: 1.7;
@@ -104,21 +102,79 @@ a:hover {
   text-shadow: 0 0 12px rgba(255,255,255,0.4);
 }
 
-/* Technical grid background */
-.bg-grid {
-  background-size: 50px 50px;
-  background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-  mask-image: linear-gradient(to bottom, black 20%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, black 20%, transparent 100%);
+/* Premium Animated Background System */
+.animated-bg-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -999;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  pointer-events: none;
+}
+
+.bg-shape {
+  position: absolute;
+  filter: blur(100px);
+  border-radius: 50%;
+  animation: bgFloat 25s infinite ease-in-out alternate;
+  will-change: transform;
+}
+
+.shape-1 {
+  background: var(--bg-secondary);
+  width: 60vw;
+  height: 60vw;
+  top: -10%;
+  left: -10%;
+  opacity: 0.8;
+  animation-delay: 0s;
+}
+
+.shape-2 {
+  background: var(--primary-color);
+  width: 40vw;
+  height: 40vw;
+  bottom: -20%;
+  right: -10%;
+  opacity: 0.15;
+  animation-duration: 35s;
+  animation-direction: alternate-reverse;
+}
+
+.shape-3 {
+  background: var(--bg-secondary);
+  width: 50vw;
+  height: 50vw;
+  top: 30%;
+  left: 40%;
+  opacity: 0.5;
+  animation-duration: 40s;
+  animation-delay: -15s;
+}
+
+@keyframes bgFloat {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(8%, 12%) scale(1.1); }
+  66% { transform: translate(-5%, 8%) scale(0.9); }
+  100% { transform: translate(3%, -5%) scale(1.05); }
+}
+
+.bg-grid-overlay {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: -1;
-  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  background-size: 60px 60px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  mask-image: radial-gradient(circle at center, black 30%, transparent 90%);
+  -webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 90%);
+  z-index: 1;
 }
 
 .container {
