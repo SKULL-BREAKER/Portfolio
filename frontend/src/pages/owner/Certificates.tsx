@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { supabase } from '../../lib/supabase';
 import { Trash2, File, Plus } from 'lucide-react';
 
 interface Certificate {
@@ -18,7 +18,6 @@ const Certificates: React.FC = () => {
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
 
-  // Form state
   const [title, setTitle] = useState('');
   const [organization, setOrganization] = useState('');
   const [issueDate, setIssueDate] = useState('');
@@ -30,9 +29,15 @@ const Certificates: React.FC = () => {
 
   const fetchCertificates = async () => {
     try {
-      const response = await axios.get('/api/certificates');
-      if (response.data.success) {
-        setCertificates(response.data.certificates || []);
+      const { data, error } = await supabase.from('certificates').select('*').order('issue_date', { ascending: false });
+      if (data) {
+        setCertificates(data.map(d => ({
+          ...d,
+          issueDate: d.issue_date,
+          fileUrl: d.file_url,
+          originalFileName: d.original_file_name,
+          mimeType: d.mime_type
+        })));
       }
     } catch (error) {
       console.error('Error fetching certificates', error);
@@ -57,30 +62,40 @@ const Certificates: React.FC = () => {
     setUploading(true);
     setMessage('');
 
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('organization', organization);
-    formData.append('issueDate', issueDate);
-    formData.append('file', file);
-    formData.append('isPublic', 'true');
-
     try {
-      const response = await axios.post('/api/certificates', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
       
-      if (response.data.success) {
-        setMessage('Certificate uploaded successfully!');
-        // Reset form
-        setTitle('');
-        setOrganization('');
-        setIssueDate('');
-        setFile(null);
-        // Refresh list
-        fetchCertificates();
-      }
+      const { error: uploadError } = await supabase.storage.from('portfolio_files').upload(filePath, file);
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from('portfolio_files').getPublicUrl(filePath);
+      
+      const payload = {
+        profile_id: user.id,
+        title,
+        organization,
+        issue_date: issueDate,
+        file_url: data.publicUrl,
+        original_file_name: file.name,
+        mime_type: file.type,
+        size_bytes: file.size,
+        is_public: true
+      };
+
+      const { error } = await supabase.from('certificates').insert([payload]);
+      if (error) throw error;
+      
+      setMessage('Certificate uploaded successfully!');
+      setTitle('');
+      setOrganization('');
+      setIssueDate('');
+      setFile(null);
+      fetchCertificates();
     } catch (error) {
       console.error('Error uploading certificate', error);
       setMessage('Failed to upload certificate.');
@@ -94,10 +109,9 @@ const Certificates: React.FC = () => {
     if (!window.confirm('Are you sure you want to delete this certificate?')) return;
     
     try {
-      const response = await axios.delete(`/api/certificates/${id}`);
-      if (response.data.success) {
-        setCertificates(prev => prev.filter(c => c.id !== id));
-      }
+      const { error } = await supabase.from('certificates').delete().eq('id', id);
+      if (error) throw error;
+      setCertificates(prev => prev.filter(c => c.id !== id));
     } catch (error) {
       console.error('Error deleting certificate', error);
       alert('Failed to delete certificate.');
@@ -114,7 +128,6 @@ const Certificates: React.FC = () => {
       
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-8)', alignItems: 'start' }}>
         
-        {/* Upload Form */}
         <div className="premium-card">
           <h3 style={{ fontSize: 'var(--text-lg)', marginBottom: 'var(--space-4)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Plus size={20} /> Add New Certificate
@@ -181,7 +194,6 @@ const Certificates: React.FC = () => {
           </form>
         </div>
 
-        {/* Certificates List */}
         <div>
           <h3 style={{ fontSize: 'var(--text-lg)', marginBottom: 'var(--space-4)' }}>Your Certificates</h3>
           
@@ -205,7 +217,7 @@ const Certificates: React.FC = () => {
                     }}>
                       {cert.mimeType?.startsWith('image/') ? (
                         <img 
-                          src={`/api/files/${cert.fileUrl}`} 
+                          src={cert.fileUrl} 
                           alt={cert.title} 
                           style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                         />

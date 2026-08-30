@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { supabase } from '../../lib/supabase';
 import { Trash2, Edit2, Plus, FolderGit2 } from 'lucide-react';
 
 interface Project {
@@ -36,9 +36,16 @@ const Projects: React.FC = () => {
 
   const fetchProjects = async () => {
     try {
-      const response = await axios.get('/api/projects');
-      if (response.data.success) {
-        setProjects(response.data.data || []);
+      const { data, error } = await supabase.from('projects').select('*').order('display_order', { ascending: true });
+      if (data) {
+        setProjects(data.map(d => ({
+          ...d,
+          shortDescription: d.short_description,
+          githubUrl: d.github_url,
+          liveUrl: d.live_url,
+          isPublic: d.is_public,
+          isFeatured: d.is_featured
+        })));
       }
     } catch (error) {
       console.error('Error fetching projects', error);
@@ -64,10 +71,26 @@ const Projects: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const payload = {
+        profile_id: user.id,
+        title: formData.title,
+        slug: formData.slug,
+        short_description: formData.shortDescription,
+        description: formData.description,
+        technologies: formData.technologies,
+        is_public: formData.isPublic,
+        is_featured: formData.isFeatured
+      };
+
       if (editingId) {
-        await axios.put(`/api/projects/${editingId}`, formData);
+        const { error } = await supabase.from('projects').update(payload).eq('id', editingId);
+        if (error) throw error;
       } else {
-        await axios.post('/api/projects', formData);
+        const { error } = await supabase.from('projects').insert([payload]);
+        if (error) throw error;
       }
       setShowForm(false);
       setEditingId(null);
@@ -96,7 +119,8 @@ const Projects: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this project?')) return;
     try {
-      await axios.delete(`/api/projects/${id}`);
+      const { error } = await supabase.from('projects').delete().eq('id', id);
+      if (error) throw error;
       setProjects(prev => prev.filter(p => p.id !== id));
     } catch (error) {
       console.error('Error deleting project', error);

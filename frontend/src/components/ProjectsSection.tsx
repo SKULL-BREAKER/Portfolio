@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { supabase } from '../lib/supabase';
 import { ExternalLink, FolderGit2 } from 'lucide-react';
 
 const ProjectsSection: React.FC = () => {
@@ -9,9 +9,14 @@ const ProjectsSection: React.FC = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const res = await axios.get('/api/projects');
-        if (res.data.success) {
-          setProjects(res.data.data);
+        const { data, error } = await supabase.from('projects').select('*').order('display_order', { ascending: true });
+        if (data) {
+          setProjects(data.map(d => ({
+            ...d, 
+            shortDescription: d.short_description, 
+            githubUrl: d.github_url, 
+            liveUrl: d.live_url
+          })));
         }
       } catch (err) {
         console.error('Failed to fetch projects');

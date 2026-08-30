@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { supabase } from '../../lib/supabase';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Download, FolderGit2, Mail, Link as LinkIcon } from 'lucide-react';
 
@@ -12,16 +12,18 @@ const Home: React.FC = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        // In a real scenario, this fetches the public profile
-        // For now, we'll mock the data structurally if backend is not seeded
-        const res = await axios.get('/api/profile');
-        if (res.data.success) {
-          setProfile(res.data.profile);
+        const { data: profileData, error: profileError } = await supabase.from('profiles').select('*').limit(1).maybeSingle();
+        if (profileData) {
+          setProfile({
+            ...profileData,
+            profileImage: profileData.profile_image,
+            resumeFile: profileData.resume_file
+          });
         }
         
-        const linksRes = await axios.get('/api/links');
-        if (linksRes.data.success) {
-          setLinks(linksRes.data.data);
+        const { data: linksData, error: linksError } = await supabase.from('social_links').select('*').order('display_order', { ascending: true });
+        if (linksData) {
+          setLinks(linksData.map(l => ({ ...l, displayName: l.display_name })));
         }
       } catch (err) {
         console.error('Failed to fetch profile', err);

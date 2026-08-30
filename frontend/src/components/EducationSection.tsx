@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { supabase } from '../lib/supabase';
 import { GraduationCap } from 'lucide-react';
 
 const EducationSection: React.FC = () => {
@@ -9,13 +9,13 @@ const EducationSection: React.FC = () => {
   useEffect(() => {
     const fetchEducation = async () => {
       try {
-        const res = await axios.get('/api/education');
-        if (res.data.success) {
-          // Sort by start date descending
-          const sorted = res.data.data.sort((a: any, b: any) => 
-            new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
-          );
-          setEducation(sorted);
+        const { data, error } = await supabase.from('education').select('*').order('start_date', { ascending: false });
+        if (data) {
+          setEducation(data.map(d => ({
+            ...d, 
+            startDate: d.start_date, 
+            endDate: d.end_date
+          })));
         }
       } catch (err) {
         console.error('Failed to fetch education');

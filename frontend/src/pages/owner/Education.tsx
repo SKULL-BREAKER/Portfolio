@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { supabase } from '../../lib/supabase';
 import { Trash2, Edit2, Plus, GraduationCap } from 'lucide-react';
 
 interface Education {
@@ -36,9 +36,13 @@ const EducationPage: React.FC = () => {
 
   const fetchEducation = async () => {
     try {
-      const response = await axios.get('/api/education');
-      if (response.data.success) {
-        setEducationList(response.data.data || []);
+      const { data, error } = await supabase.from('education').select('*').order('start_date', { ascending: false });
+      if (data) {
+        setEducationList(data.map(d => ({
+          ...d,
+          startDate: d.start_date,
+          endDate: d.end_date
+        })));
       }
     } catch (error) {
       console.error('Error fetching education', error);
@@ -55,10 +59,27 @@ const EducationPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const payload = {
+        profile_id: user.id,
+        institution: formData.institution,
+        degree: formData.degree,
+        department: formData.department,
+        start_date: formData.startDate,
+        end_date: formData.endDate || null,
+        grade: formData.grade,
+        description: formData.description,
+        is_public: formData.isPublic
+      };
+
       if (editingId) {
-        await axios.put(`/api/education/${editingId}`, formData);
+        const { error } = await supabase.from('education').update(payload).eq('id', editingId);
+        if (error) throw error;
       } else {
-        await axios.post('/api/education', formData);
+        const { error } = await supabase.from('education').insert([payload]);
+        if (error) throw error;
       }
       setShowForm(false);
       resetForm();
@@ -77,7 +98,8 @@ const EducationPage: React.FC = () => {
       startDate: edu.startDate ? new Date(edu.startDate).toISOString().split('T')[0] : '',
       endDate: edu.endDate ? new Date(edu.endDate).toISOString().split('T')[0] : '',
       grade: edu.grade || '',
-      description: edu.description || ''
+      description: edu.description || '',
+      isPublic: true
     });
     setEditingId(edu.id);
     setShowForm(true);
@@ -86,7 +108,8 @@ const EducationPage: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this education record?')) return;
     try {
-      await axios.delete(`/api/education/${id}`);
+      const { error } = await supabase.from('education').delete().eq('id', id);
+      if (error) throw error;
       setEducationList(prev => prev.filter(e => e.id !== id));
     } catch (error) {
       console.error('Error deleting education', error);

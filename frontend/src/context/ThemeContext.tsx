@@ -1,5 +1,5 @@
 import React, { createContext, useEffect, useContext, useState } from 'react';
-import axios from 'axios';
+import { supabase } from '../lib/supabase';
 
 interface ThemeSettings {
   bgPrimary?: string;
@@ -24,14 +24,16 @@ export const ThemeProvider: React.FC<{children: React.ReactNode}> = ({ children 
   useEffect(() => {
     const fetchTheme = async () => {
       try {
-        const response = await axios.get('/api/profile');
-        if (response.data.success && response.data.profile?.themeSettings) {
-          const parsedTheme = JSON.parse(response.data.profile.themeSettings);
-          setTheme(parsedTheme);
-          applyTheme(parsedTheme);
+        const { data, error } = await supabase.from('profiles').select('theme_settings').limit(1).maybeSingle();
+        if (data && data.theme_settings) {
+          const settings = typeof data.theme_settings === 'string' 
+            ? JSON.parse(data.theme_settings) 
+            : data.theme_settings;
+          setTheme(settings);
+          applyTheme(settings);
         }
-      } catch (error) {
-        console.error('Failed to load theme settings', error);
+      } catch (err) {
+        console.error('Failed to load theme settings:', err);
       }
     };
     fetchTheme();

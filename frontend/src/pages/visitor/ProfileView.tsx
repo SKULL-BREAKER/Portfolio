@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { supabase } from '../../lib/supabase';
 import ExperienceSection from '../../components/ExperienceSection';
 import EducationSection from '../../components/EducationSection';
 
@@ -9,9 +9,9 @@ const ProfileView: React.FC = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get('/api/profile');
-        if (res.data.success) {
-          setProfile(res.data.profile);
+        const { data, error } = await supabase.from('profiles').select('*').limit(1).maybeSingle();
+        if (data) {
+          setProfile(data);
         }
       } catch (err) {
         console.error('Failed to fetch profile', err);

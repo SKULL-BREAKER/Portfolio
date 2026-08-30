@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { supabase } from '../lib/supabase';
 import { Award, ExternalLink } from 'lucide-react';
 
 const CertificatesSection: React.FC = () => {
@@ -9,9 +9,14 @@ const CertificatesSection: React.FC = () => {
   useEffect(() => {
     const fetchCertificates = async () => {
       try {
-        const res = await axios.get('/api/certificates');
-        if (res.data.success) {
-          setCertificates(res.data.certificates);
+        const { data, error } = await supabase.from('certificates').select('*').order('issue_date', { ascending: false });
+        if (data) {
+          setCertificates(data.map(d => ({
+            ...d, 
+            issueDate: d.issue_date, 
+            fileUrl: d.file_url, 
+            mimeType: d.mime_type
+          })));
         }
       } catch (err) {
         console.error('Failed to fetch certificates');
@@ -48,7 +53,7 @@ const CertificatesSection: React.FC = () => {
               }}>
                 {cert.mimeType?.startsWith('image/') ? (
                   <img 
-                    src={`/api/files/${cert.fileUrl}`} 
+                    src={cert.fileUrl} 
                     alt={cert.title} 
                     style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
                   />
@@ -66,7 +71,7 @@ const CertificatesSection: React.FC = () => {
                 </p>
                 <div style={{ marginTop: 'auto' }}>
                   {cert.fileUrl && (
-                    <a href={`/api/files/${cert.fileUrl}`} target="_blank" rel="noreferrer" className="btn btn-secondary" style={{ width: '100%', display: 'flex', justifyContent: 'center', gap: '8px' }}>
+                    <a href={cert.fileUrl} target="_blank" rel="noreferrer" className="btn btn-secondary" style={{ width: '100%', display: 'flex', justifyContent: 'center', gap: '8px' }}>
                       <ExternalLink size={16} /> Open Full Size
                     </a>
                   )}

@@ -10,7 +10,7 @@ const ProtectedRoute: React.FC<{children: React.ReactNode}> = ({ children }) => 
   }
 
   if (!isAuthenticated || role !== 'OWNER') {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/admin" replace />;
   }
 
   return <>{children}</>;

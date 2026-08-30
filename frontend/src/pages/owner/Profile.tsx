@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { supabase } from '../../lib/supabase';
 import { useTheme } from '../../context/ThemeContext';
 
 interface ProfileData {
@@ -47,19 +47,22 @@ const Profile: React.FC = () => {
 
   const fetchProfile = async () => {
     try {
-      const response = await axios.get('/api/profile');
-      if (response.data.success && response.data.profile) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
+      if (data) {
         setProfile({
-          headline: response.data.profile.headline || '',
-          about: response.data.profile.about || '',
-          careerObjective: response.data.profile.careerObjective || '',
-          status: response.data.profile.status || 'Available for opportunities',
-          isPublic: response.data.profile.isPublic === 1 || response.data.profile.isPublic === true,
-          profileImage: response.data.profile.profileImage || '',
-          resumeFile: response.data.profile.resumeFile || '',
-          resumeOriginal: response.data.profile.resumeOriginal || '',
-          themeSettings: response.data.profile.themeSettings 
-            ? JSON.parse(response.data.profile.themeSettings)
+          headline: data.headline || '',
+          about: data.about || '',
+          careerObjective: data.career_objective || '',
+          status: data.status || 'Available for opportunities',
+          isPublic: data.is_public === true,
+          profileImage: data.profile_image || '',
+          resumeFile: data.resume_file || '',
+          resumeOriginal: data.resume_original || '',
+          themeSettings: data.theme_settings 
+            ? (typeof data.theme_settings === 'string' ? JSON.parse(data.theme_settings) : data.theme_settings)
             : { bgPrimary: '#1a0508', bgSecondary: '#2d0a11', primaryColor: '#e2e8f0', textPrimary: '#ffffff' }
         });
       }
@@ -74,18 +77,14 @@ const Profile: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     
-    // Check if it's a checkbox to handle boolean
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
       setProfile(prev => ({ ...prev, [name]: checked }));
     } else if (name.startsWith('theme_')) {
       const themeKey = name.replace('theme_', '');
-      setProfile(prev => {
-        const newThemeSettings = { ...prev.themeSettings, [themeKey]: value };
-        // Live preview
-        updateTheme(newThemeSettings);
-        return { ...prev, themeSettings: newThemeSettings };
-      });
+      const newThemeSettings = { ...profile.themeSettings, [themeKey]: value };
+      setProfile(prev => ({ ...prev, themeSettings: newThemeSettings }));
+      updateTheme(newThemeSettings);
     } else {
       setProfile(prev => ({ ...prev, [name]: value }));
     }
@@ -97,42 +96,56 @@ const Profile: React.FC = () => {
     setMessage('');
     
     try {
-      const formData = new FormData();
-      formData.append('headline', profile.headline);
-      formData.append('about', profile.about);
-      formData.append('careerObjective', profile.careerObjective);
-      formData.append('status', profile.status);
-      formData.append('isPublic', String(profile.isPublic));
-      formData.append('themeSettings', JSON.stringify(profile.themeSettings));
-      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      let profileImageUrl = profile.profileImage;
+      let resumeFileUrl = profile.resumeFile;
+      let resumeOriginalName = profile.resumeOriginal;
+
       if (imageFile) {
-        formData.append('profileImage', imageFile);
+        const fileExt = imageFile.name.split('.').pop();
+        const filePath = `${user.id}/profile_${Math.random()}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage.from('portfolio_files').upload(filePath, imageFile);
+        if (uploadError) throw uploadError;
+        profileImageUrl = supabase.storage.from('portfolio_files').getPublicUrl(filePath).data.publicUrl;
       }
       
       if (resumeUploadFile) {
-        formData.append('resumeFile', resumeUploadFile);
+        const fileExt = resumeUploadFile.name.split('.').pop();
+        const filePath = `${user.id}/resume_${Math.random()}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage.from('portfolio_files').upload(filePath, resumeUploadFile);
+        if (uploadError) throw uploadError;
+        resumeFileUrl = supabase.storage.from('portfolio_files').getPublicUrl(filePath).data.publicUrl;
+        resumeOriginalName = resumeUploadFile.name;
       }
 
-      const response = await axios.put('/api/profile', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const payload = {
+        headline: profile.headline,
+        about: profile.about,
+        career_objective: profile.careerObjective,
+        status: profile.status,
+        is_public: profile.isPublic,
+        theme_settings: profile.themeSettings,
+        profile_image: profileImageUrl,
+        resume_file: resumeFileUrl,
+        resume_original: resumeOriginalName
+      };
+
+      const { error } = await supabase.from('profiles').update(payload).eq('id', user.id);
+      if (error) throw error;
       
-      if (response.data.success) {
-        setMessage('Profile updated successfully!');
-        if (imageFile || resumeUploadFile) {
-           fetchProfile(); // reload to get new URLs
-           setImageFile(null);
-           setResumeUploadFile(null);
-        }
-      } else {
-        setMessage('Failed to update profile.');
+      setMessage('Profile updated successfully!');
+      if (imageFile || resumeUploadFile) {
+         fetchProfile();
+         setImageFile(null);
+         setResumeUploadFile(null);
       }
     } catch (error) {
       console.error('Error updating profile', error);
       setMessage('An error occurred while saving.');
     } finally {
       setSaving(false);
-      // clear message after 3 seconds
       setTimeout(() => setMessage(''), 3000);
     }
   };

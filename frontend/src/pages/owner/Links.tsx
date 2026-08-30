@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { supabase } from '../../lib/supabase';
 import { Trash2, Link as LinkIcon, Plus } from 'lucide-react';
 
 interface SocialLink {
@@ -30,9 +30,13 @@ const Links: React.FC = () => {
 
   const fetchLinks = async () => {
     try {
-      const response = await axios.get('/api/links');
-      if (response.data.success) {
-        setLinks(response.data.data || []);
+      const { data, error } = await supabase.from('social_links').select('*').order('display_order', { ascending: true });
+      if (data) {
+        setLinks(data.map(d => ({
+          ...d,
+          displayName: d.display_name,
+          isPublic: d.is_public
+        })));
       }
     } catch (error) {
       console.error('Error fetching links', error);
@@ -57,12 +61,23 @@ const Links: React.FC = () => {
     setMessage('');
     
     try {
-      const response = await axios.post('/api/links', formData);
-      if (response.data.success) {
-        setMessage('Link added successfully!');
-        setFormData({ platform: 'github', displayName: '', url: '', isPublic: true });
-        fetchLinks();
-      }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const payload = {
+        profile_id: user.id,
+        platform: formData.platform,
+        display_name: formData.displayName,
+        url: formData.url,
+        is_public: formData.isPublic
+      };
+
+      const { error } = await supabase.from('social_links').insert([payload]);
+      if (error) throw error;
+      
+      setMessage('Link added successfully!');
+      setFormData({ platform: 'github', displayName: '', url: '', isPublic: true });
+      fetchLinks();
     } catch (error) {
       console.error('Error adding link', error);
       setMessage('Failed to add link.');
@@ -76,10 +91,9 @@ const Links: React.FC = () => {
     if (!window.confirm('Are you sure you want to delete this link?')) return;
     
     try {
-      const response = await axios.delete(`/api/links/${id}`);
-      if (response.data.success) {
-        setLinks(prev => prev.filter(item => item.id !== id));
-      }
+      const { error } = await supabase.from('social_links').delete().eq('id', id);
+      if (error) throw error;
+      setLinks(prev => prev.filter(item => item.id !== id));
     } catch (error) {
       console.error('Error deleting link', error);
       alert('Failed to delete link.');

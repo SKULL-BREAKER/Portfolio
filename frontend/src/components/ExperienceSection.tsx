@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { supabase } from '../lib/supabase';
 import { Briefcase } from 'lucide-react';
 
 const ExperienceSection: React.FC = () => {
@@ -9,13 +9,15 @@ const ExperienceSection: React.FC = () => {
   useEffect(() => {
     const fetchExperiences = async () => {
       try {
-        const res = await axios.get('/api/experience');
-        if (res.data.success) {
-          // Sort by start date descending
-          const sorted = res.data.data.sort((a: any, b: any) => 
-            new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
-          );
-          setExperiences(sorted);
+        const { data, error } = await supabase.from('experience').select('*').order('start_date', { ascending: false });
+        if (data) {
+          setExperiences(data.map(d => ({
+            ...d, 
+            startDate: d.start_date, 
+            endDate: d.end_date, 
+            isCurrent: d.is_current, 
+            companyUrl: d.company_url
+          })));
         }
       } catch (err) {
         console.error('Failed to fetch experience');

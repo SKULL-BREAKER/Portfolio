@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { supabase } from '../../lib/supabase';
 import { Trash2, Edit2, Plus, Briefcase } from 'lucide-react';
 
 interface Experience {
@@ -36,9 +36,15 @@ const ExperiencePage: React.FC = () => {
 
   const fetchExperiences = async () => {
     try {
-      const response = await axios.get('/api/experience');
-      if (response.data.success) {
-        setExperiences(response.data.data || []);
+      const { data, error } = await supabase.from('experience').select('*').order('start_date', { ascending: false });
+      if (data) {
+        setExperiences(data.map(d => ({
+          ...d,
+          startDate: d.start_date,
+          endDate: d.end_date,
+          isCurrent: d.is_current,
+          companyUrl: d.company_url
+        })));
       }
     } catch (error) {
       console.error('Error fetching experience', error);
@@ -60,16 +66,27 @@ const ExperiencePage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Clean up empty endDate if current
-      const payload = { ...formData };
-      if (payload.isCurrent) {
-        payload.endDate = '';
-      }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const payload = {
+        profile_id: user.id,
+        company: formData.company,
+        position: formData.position,
+        start_date: formData.startDate,
+        end_date: formData.isCurrent ? null : formData.endDate,
+        is_current: formData.isCurrent,
+        description: formData.description,
+        company_url: formData.companyUrl,
+        is_public: formData.isPublic
+      };
 
       if (editingId) {
-        await axios.put(`/api/experience/${editingId}`, payload);
+        const { error } = await supabase.from('experience').update(payload).eq('id', editingId);
+        if (error) throw error;
       } else {
-        await axios.post('/api/experience', payload);
+        const { error } = await supabase.from('experience').insert([payload]);
+        if (error) throw error;
       }
       setShowForm(false);
       resetForm();
@@ -88,7 +105,8 @@ const ExperiencePage: React.FC = () => {
       endDate: exp.endDate ? new Date(exp.endDate).toISOString().split('T')[0] : '',
       isCurrent: exp.isCurrent,
       description: exp.description || '',
-      companyUrl: exp.companyUrl || ''
+      companyUrl: exp.companyUrl || '',
+      isPublic: true
     });
     setEditingId(exp.id);
     setShowForm(true);
@@ -97,7 +115,8 @@ const ExperiencePage: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this role?')) return;
     try {
-      await axios.delete(`/api/experience/${id}`);
+      const { error } = await supabase.from('experience').delete().eq('id', id);
+      if (error) throw error;
       setExperiences(prev => prev.filter(e => e.id !== id));
     } catch (error) {
       console.error('Error deleting experience', error);
