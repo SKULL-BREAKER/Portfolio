@@ -85,25 +85,30 @@ const Home: React.FC = () => {
           </div>
           
           <h1 style={{ 
-            fontSize: 'clamp(2.5rem, 5vw, 4.5rem)', 
+            fontSize: 'clamp(1.5rem, 6vw, 4rem)', 
             lineHeight: '1.1',
             letterSpacing: '-0.03em',
             marginBottom: 'var(--space-4)',
             display: 'flex',
             alignItems: 'center',
-            gap: 'var(--space-4)'
+            gap: 'var(--space-4)',
+            whiteSpace: 'nowrap',
+            width: '100%',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
           }}>
             {profile?.profileImage && (
               <img 
                 src={profile.profileImage} 
                 alt="Profile"
                 style={{
-                  width: '80px',
-                  height: '80px',
+                  width: 'min(80px, 12vw)',
+                  height: 'min(80px, 12vw)',
                   borderRadius: '50%',
                   objectFit: 'cover',
                   border: '2px solid var(--border-color)',
-                  boxShadow: '0 0 15px rgba(226, 232, 240, 0.2)'
+                  boxShadow: '0 0 15px rgba(226, 232, 240, 0.2)',
+                  flexShrink: 0
                 }}
               />
             )}
