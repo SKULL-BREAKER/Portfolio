@@ -37,8 +37,8 @@ const AnimatedBackground: React.FC = () => {
       return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     };
 
-    const lineColor = hexToRgba(theme.primaryColor || '#e2e8f0', 0.15);
-    const bgColor = theme.bgPrimary || '#1a0508';
+    const lineColor = hexToRgba(theme?.primaryColor || '#e2e8f0', 0.15);
+    const bgColor = theme?.bgPrimary || '#1a0508';
 
     ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, width, height);
@@ -142,7 +142,7 @@ const AnimatedBackground: React.FC = () => {
   }, [theme]);
 
   return (
-    <div className="animated-bg-container" style={{ backgroundColor: theme.bgPrimary }}>
+    <div className="animated-bg-container" style={{ backgroundColor: theme?.bgPrimary || 'var(--bg-primary)' }}>
       <canvas 
         ref={canvasRef} 
         style={{ 
@@ -161,7 +161,7 @@ const AnimatedBackground: React.FC = () => {
         left: 0,
         width: '100%',
         height: '100%',
-        background: `radial-gradient(circle at center, transparent 0%, ${theme.bgPrimary} 110%)`,
+        background: `radial-gradient(circle at center, transparent 0%, ${theme?.bgPrimary || 'var(--bg-primary)'} 110%)`,
         pointerEvents: 'none'
       }}></div>
     </div>
