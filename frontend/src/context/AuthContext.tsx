@@ -21,8 +21,6 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('AuthContext mounted. Env email is:', process.env.VITE_OWNER_EMAIL);
-    
     // Check active session and sets the user
     const checkAuth = async () => {
       try {
