@@ -7,11 +7,9 @@ const OwnerLayout: React.FC = () => {
   const { logout } = useAuth();
   
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--bg-primary)' }}>
+    <div className="owner-layout" style={{ backgroundColor: 'var(--bg-primary)' }}>
       {/* Sidebar */}
-      <aside style={{ 
-        width: '260px', 
-        borderRight: '1px solid var(--border-color)',
+      <aside className="sidebar" style={{ 
         backgroundColor: 'var(--bg-secondary)',
         padding: 'var(--space-6)',
         display: 'flex',
@@ -27,7 +25,7 @@ const OwnerLayout: React.FC = () => {
           </Link>
         </div>
         
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', flex: 1 }}>
+        <nav className="sidebar-nav" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', flex: 1 }}>
           <Link to="/dashboard" className="sidebar-link">
             <LayoutDashboard size={18} /> Dashboard
           </Link>
@@ -59,11 +57,22 @@ const OwnerLayout: React.FC = () => {
       </aside>
       
       {/* Main Content */}
-      <main style={{ flex: 1, padding: 'var(--space-8)', overflowY: 'auto' }}>
+      <main className="main-content" style={{ padding: 'var(--space-8)', overflowY: 'auto' }}>
         <Outlet />
       </main>
       
       <style>{`
+        .owner-layout {
+          display: flex;
+          min-height: 100vh;
+        }
+        .sidebar {
+          width: 260px;
+          border-right: 1px solid var(--border-color);
+        }
+        .main-content {
+          flex: 1;
+        }
         .sidebar-link {
           display: flex;
           align-items: center;
@@ -76,6 +85,22 @@ const OwnerLayout: React.FC = () => {
         .sidebar-link:hover {
           background-color: rgba(255, 255, 255, 0.05);
           color: var(--text-primary);
+        }
+        @media (max-width: 768px) {
+          .owner-layout {
+            flex-direction: column;
+          }
+          .sidebar {
+            width: 100%;
+            border-right: none;
+            border-bottom: 1px solid var(--border-color);
+            padding: var(--space-4) !important;
+          }
+          .sidebar-nav {
+            flex-direction: row !important;
+            flex-wrap: wrap;
+            margin-bottom: var(--space-4);
+          }
         }
       `}</style>
     </div>
