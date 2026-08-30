@@ -37,8 +37,8 @@ const AnimatedBackground: React.FC = () => {
       return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     };
 
-    // Very soft, peaceful lines
-    const lineColor = hexToRgba(theme?.primaryColor || '#e2e8f0', 0.1);
+    // Very soft, peaceful lines using the dedicated maze color (fallback to primaryColor or default)
+    const lineColor = hexToRgba(theme?.mazeColor || theme?.primaryColor || '#e2e8f0', 0.1);
 
     ctx.strokeStyle = lineColor;
     ctx.lineWidth = 1.5;

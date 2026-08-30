@@ -6,6 +6,7 @@ interface ThemeSettings {
   bgSecondary?: string;
   primaryColor?: string;
   textPrimary?: string;
+  mazeColor?: string;
 }
 
 interface ThemeContextType {
@@ -44,6 +45,7 @@ export const ThemeProvider: React.FC<{children: React.ReactNode}> = ({ children 
     if (settings.bgSecondary) root.style.setProperty('--bg-secondary', settings.bgSecondary);
     if (settings.primaryColor) root.style.setProperty('--primary-color', settings.primaryColor);
     if (settings.textPrimary) root.style.setProperty('--text-primary', settings.textPrimary);
+    if (settings.mazeColor) root.style.setProperty('--maze-color', settings.mazeColor);
   };
 
   const updateTheme = (newTheme: ThemeSettings) => {

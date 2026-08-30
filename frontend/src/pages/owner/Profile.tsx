@@ -18,6 +18,7 @@ interface ProfileData {
     bgSecondary: string;
     primaryColor: string;
     textPrimary: string;
+    mazeColor?: string;
   };
 }
 
@@ -35,7 +36,8 @@ const Profile: React.FC = () => {
       bgPrimary: '#1a0508',
       bgSecondary: '#2d0a11',
       primaryColor: '#e2e8f0',
-      textPrimary: '#ffffff'
+      textPrimary: '#ffffff',
+      mazeColor: '#e2e8f0'
     }
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -69,7 +71,7 @@ const Profile: React.FC = () => {
           resumeOriginal: data.resume_original || '',
           themeSettings: data.theme_settings 
             ? (typeof data.theme_settings === 'string' ? JSON.parse(data.theme_settings) : data.theme_settings)
-            : { bgPrimary: '#1a0508', bgSecondary: '#2d0a11', primaryColor: '#e2e8f0', textPrimary: '#ffffff' }
+            : { bgPrimary: '#1a0508', bgSecondary: '#2d0a11', primaryColor: '#e2e8f0', textPrimary: '#ffffff', mazeColor: '#e2e8f0' }
         });
       }
     } catch (error) {
@@ -413,6 +415,20 @@ const Profile: React.FC = () => {
                   style={{ width: '50px', height: '40px', padding: '0', border: 'none', background: 'none', cursor: 'pointer' }}
                 />
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-sm)' }}>{profile.themeSettings.textPrimary}</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+              <label style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>Maze Line Color</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                <input 
+                  type="color" 
+                  name="theme_mazeColor"
+                  value={profile.themeSettings.mazeColor || '#e2e8f0'}
+                  onChange={handleChange}
+                  style={{ width: '50px', height: '40px', padding: '0', border: 'none', background: 'none', cursor: 'pointer' }}
+                />
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-sm)' }}>{profile.themeSettings.mazeColor || '#e2e8f0'}</span>
               </div>
             </div>
           </div>
