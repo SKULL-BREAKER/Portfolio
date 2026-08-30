@@ -82,7 +82,7 @@ const Landing: React.FC = () => {
           marginBottom: '2rem'
         }}>
           <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#3b82f6' }}></span>
-          The Ultimate Portfolio SaaS
+          Be yourself.
         </div>
 
         <h1 style={{
