@@ -35,7 +35,7 @@ const ProfileView: React.FC = () => {
         <section className="container" style={{ paddingTop: 'var(--space-12)', paddingBottom: 'var(--space-8)' }}>
           <h2 style={{ fontSize: 'var(--text-3xl)', marginBottom: 'var(--space-6)' }}>About Me</h2>
           <div className="premium-card" style={{ padding: 'var(--space-6)' }}>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-lg)', lineHeight: 1.8, margin: 0 }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-lg)', lineHeight: 1.8, margin: 0, whiteSpace: 'pre-wrap' }}>
               {profile.about}
             </p>
           </div>
