@@ -38,63 +38,88 @@ const AnimatedBackground: React.FC = () => {
     };
 
     // Very soft, peaceful lines
-    const lineColor = hexToRgba(theme?.primaryColor || '#e2e8f0', 0.08);
+    const lineColor = hexToRgba(theme?.primaryColor || '#e2e8f0', 0.1);
 
     ctx.strokeStyle = lineColor;
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 1.5;
+    ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    const size = 35; // Size of each isometric cube
-    const h = size * Math.sqrt(3) / 2; // Height of an equilateral triangle
+    const drawMaze = (w: number, h: number) => {
+      const cellSize = 40;
+      const cols = Math.floor(w / cellSize) + 2;
+      const rows = Math.floor(h / cellSize) + 2;
 
-    const drawCube = (x: number, y: number) => {
-      // Top face
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(x + size, y - h);
-      ctx.lineTo(x + 2 * size, y);
-      ctx.lineTo(x + size, y + h);
-      ctx.closePath();
-      ctx.stroke();
+      class Cell {
+        i: number;
+        j: number;
+        visited: boolean;
 
-      // Left face
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(x + size, y + h);
-      ctx.lineTo(x + size, y + h + size);
-      ctx.lineTo(x, y + size);
-      ctx.closePath();
-      ctx.stroke();
-
-      // Right face
-      ctx.beginPath();
-      ctx.moveTo(x + 2 * size, y);
-      ctx.lineTo(x + size, y + h);
-      ctx.lineTo(x + size, y + h + size);
-      ctx.lineTo(x + 2 * size, y + size);
-      ctx.closePath();
-      ctx.stroke();
-    };
-
-    // Generate a static 3D Isometric Maze / Building UI
-    // We draw cubes randomly to create a staggered, architectural "maze" feel.
-    // It is completely unmotioned (drawn only once).
-    for (let row = -5; row < height / h + 5; row++) {
-      for (let col = -5; col < width / (3 * size) + 5; col++) {
-        let x = col * 3 * size;
-        let y = row * h;
-        
-        // Offset odd rows for isometric alignment
-        if (row % 2 !== 0) {
-          x += 1.5 * size;
+        constructor(i: number, j: number) {
+          this.i = i;
+          this.j = j;
+          this.visited = false;
         }
 
-        // Draw a cube 65% of the time to create a "maze-like building" structure
-        if (Math.random() > 0.35) {
-          drawCube(x, y);
+        checkNeighbors() {
+          let neighbors: Cell[] = [];
+          let top = grid[index(this.i, this.j - 1)];
+          let right = grid[index(this.i + 1, this.j)];
+          let bottom = grid[index(this.i, this.j + 1)];
+          let left = grid[index(this.i - 1, this.j)];
+
+          if (top && !top.visited) neighbors.push(top);
+          if (right && !right.visited) neighbors.push(right);
+          if (bottom && !bottom.visited) neighbors.push(bottom);
+          if (left && !left.visited) neighbors.push(left);
+
+          if (neighbors.length > 0) {
+            let r = Math.floor(Math.random() * neighbors.length);
+            return neighbors[r];
+          } else {
+            return undefined;
+          }
         }
       }
-    }
+
+      function index(i: number, j: number) {
+        if (i < 0 || j < 0 || i > cols - 1 || j > rows - 1) return -1;
+        return i + j * cols;
+      }
+
+      const grid: Cell[] = [];
+      for (let j = 0; j < rows; j++) {
+        for (let i = 0; i < cols; i++) {
+          grid.push(new Cell(i, j));
+        }
+      }
+
+      let current = grid[0];
+      current.visited = true;
+      const stack: Cell[] = [];
+      
+      // Build the maze instantly (no animation)
+      while (true) {
+        const next = current.checkNeighbors();
+        if (next) {
+          next.visited = true;
+          stack.push(current);
+          
+          ctx.beginPath();
+          ctx.moveTo(current.i * cellSize + cellSize/2, current.j * cellSize + cellSize/2);
+          ctx.lineTo(next.i * cellSize + cellSize/2, next.j * cellSize + cellSize/2);
+          ctx.stroke();
+
+          current = next;
+        } else if (stack.length > 0) {
+          current = stack.pop()!;
+        } else {
+          break; // Maze finished building
+        }
+      }
+    };
+
+    drawMaze(width, height);
 
     const handleResize = () => {
       // Redraw the static background if the user resizes the window
@@ -105,22 +130,10 @@ const AnimatedBackground: React.FC = () => {
       ctx.fillStyle = bgColor;
       ctx.fillRect(0, 0, newWidth, newHeight);
       ctx.strokeStyle = lineColor;
-      ctx.lineWidth = 1;
+      ctx.lineWidth = 1.5;
+      ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
-      
-      // Use a deterministic seed or just random again
-      for (let row = -5; row < newHeight / h + 5; row++) {
-        for (let col = -5; col < newWidth / (3 * size) + 5; col++) {
-          let x = col * 3 * size;
-          let y = row * h;
-          if (row % 2 !== 0) {
-            x += 1.5 * size;
-          }
-          if (Math.random() > 0.35) {
-            drawCube(x, y);
-          }
-        }
-      }
+      drawMaze(newWidth, newHeight);
     };
 
     window.addEventListener('resize', handleResize);
@@ -139,10 +152,11 @@ const AnimatedBackground: React.FC = () => {
           top: 0, 
           left: 0, 
           width: '100%', 
-          height: '100%'
+          height: '100%',
+          opacity: 0.8
         }} 
       />
-      {/* Soft gradient overlay to blend the 3D maze perfectly into the background */}
+      {/* Soft gradient overlay to blend the 2D maze perfectly into the background */}
       <div style={{
         position: 'absolute',
         top: 0,
