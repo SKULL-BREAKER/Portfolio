@@ -11,33 +11,32 @@ interface ThemeSettings {
 interface ThemeContextType {
   theme: ThemeSettings | null;
   updateTheme: (newTheme: ThemeSettings) => void;
+  fetchThemeByUsername: (username: string) => Promise<void>;
 }
 
 const ThemeContext = createContext<ThemeContextType>({
   theme: null,
-  updateTheme: () => {}
+  updateTheme: () => {},
+  fetchThemeByUsername: async () => {}
 });
 
 export const ThemeProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
   const [theme, setTheme] = useState<ThemeSettings | null>(null);
 
-  useEffect(() => {
-    const fetchTheme = async () => {
-      try {
-        const { data, error } = await supabase.from('profiles').select('theme_settings').limit(1).maybeSingle();
-        if (data && data.theme_settings) {
-          const settings = typeof data.theme_settings === 'string' 
-            ? JSON.parse(data.theme_settings) 
-            : data.theme_settings;
-          setTheme(settings);
-          applyTheme(settings);
-        }
-      } catch (err) {
-        console.error('Failed to load theme settings:', err);
+  const fetchThemeByUsername = async (username: string) => {
+    try {
+      const { data, error } = await supabase.from('profiles').select('theme_settings').eq('username', username).maybeSingle();
+      if (data && data.theme_settings) {
+        const settings = typeof data.theme_settings === 'string' 
+          ? JSON.parse(data.theme_settings) 
+          : data.theme_settings;
+        setTheme(settings);
+        applyTheme(settings);
       }
-    };
-    fetchTheme();
-  }, []);
+    } catch (err) {
+      console.error('Failed to load theme settings:', err);
+    }
+  };
 
   const applyTheme = (settings: ThemeSettings) => {
     const root = document.documentElement;
@@ -53,7 +52,7 @@ export const ThemeProvider: React.FC<{children: React.ReactNode}> = ({ children 
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, updateTheme }}>
+    <ThemeContext.Provider value={{ theme, updateTheme, fetchThemeByUsername }}>
       {children}
     </ThemeContext.Provider>
   );

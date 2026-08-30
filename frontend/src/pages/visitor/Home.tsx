@@ -1,29 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Link } from 'react-router-dom';
+import { Link, useParams, Navigate } from 'react-router-dom';
 import { ArrowRight, Download, FolderGit2, Mail, Link as LinkIcon } from 'lucide-react';
 
 
 const Home: React.FC = () => {
+  const { username } = useParams<{ username: string }>();
   const [profile, setProfile] = useState<any>(null);
   const [links, setLinks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
+      if (!username) return;
+      
       try {
-        const { data: profileData, error: profileError } = await supabase.from('profiles').select('*').limit(1).maybeSingle();
+        const { data: profileData, error: profileError } = await supabase.from('profiles').select('*').eq('username', username).maybeSingle();
         if (profileData) {
           setProfile({
             ...profileData,
             profileImage: profileData.profile_image,
             resumeFile: profileData.resume_file
           });
-        }
-        
-        const { data: linksData, error: linksError } = await supabase.from('social_links').select('*').order('display_order', { ascending: true });
-        if (linksData) {
-          setLinks(linksData.map(l => ({ ...l, displayName: l.display_name })));
+          
+          const { data: linksData, error: linksError } = await supabase.from('social_links').select('*').eq('profile_id', profileData.id).order('display_order', { ascending: true });
+          if (linksData) {
+            setLinks(linksData.map(l => ({ ...l, displayName: l.display_name })));
+          }
+        } else {
+          setNotFound(true);
         }
       } catch (err) {
         console.error('Failed to fetch profile', err);
@@ -39,6 +45,14 @@ const Home: React.FC = () => {
     };
     fetchProfile();
   }, []);
+
+  if (notFound) {
+    return <div className="container" style={{ padding: '8rem 0', textAlign: 'center' }}>
+      <h1>Portfolio Not Found</h1>
+      <p>The username "{username}" does not exist.</p>
+      <Link to="/" className="btn btn-primary" style={{ marginTop: '1rem', display: 'inline-block' }}>Create Your Own Portfolio</Link>
+    </div>;
+  }
 
   if (loading) {
     return <div className="container" style={{ padding: '8rem 0' }}>Initializing systems...</div>;

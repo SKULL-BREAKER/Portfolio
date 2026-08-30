@@ -1,15 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { useParams } from 'react-router-dom';
 import { Award, ExternalLink } from 'lucide-react';
 
 const CertificatesSection: React.FC = () => {
+  const { username } = useParams<{ username: string }>();
   const [certificates, setCertificates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCertificates = async () => {
+      if (!username) return;
       try {
-        const { data, error } = await supabase.from('certificates').select('*').order('issue_date', { ascending: false });
+        const { data: profile } = await supabase.from('profiles').select('id').eq('username', username).maybeSingle();
+        if (!profile) {
+          setLoading(false);
+          return;
+        }
+
+        const { data, error } = await supabase.from('certificates').select('*').eq('profile_id', profile.id).order('issue_date', { ascending: false });
         if (data) {
           setCertificates(data.map(d => ({
             ...d, 

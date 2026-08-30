@@ -50,13 +50,8 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
       setIsAuthenticated(true);
       setUser(session.user);
       
-      // Determine if user is OWNER based on environment variable
-      const envEmail = process.env.VITE_OWNER_EMAIL || 'nanthakumar7750@gmail.com';
-      const userEmail = session.user.email || '';
-      console.log('Login check:', { envEmail, userEmail });
-      // TEMPORARILY FORCE TRUE FOR DEBUGGING
-      const isOwner = true; 
-      setRole(isOwner ? 'OWNER' : 'VISITOR');
+      // In SaaS mode, any authenticated user is the OWNER of their own portfolio
+      setRole('OWNER');
     } else {
       setIsAuthenticated(false);
       setUser(null);

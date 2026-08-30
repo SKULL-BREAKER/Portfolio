@@ -1,15 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { useParams } from 'react-router-dom';
 import { ExternalLink, FolderGit2 } from 'lucide-react';
 
 const ProjectsSection: React.FC = () => {
+  const { username } = useParams<{ username: string }>();
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProjects = async () => {
+      if (!username) return;
       try {
-        const { data, error } = await supabase.from('projects').select('*').order('display_order', { ascending: true });
+        const { data: profile } = await supabase.from('profiles').select('id').eq('username', username).maybeSingle();
+        if (!profile) {
+          setLoading(false);
+          return;
+        }
+
+        const { data, error } = await supabase.from('projects').select('*').eq('profile_id', profile.id).order('display_order', { ascending: true });
         if (data) {
           setProjects(data.map(d => ({
             ...d, 

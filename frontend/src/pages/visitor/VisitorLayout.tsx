@@ -1,10 +1,21 @@
-import React from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Outlet, Link, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 
 const VisitorLayout: React.FC = () => {
   const { isAuthenticated, role } = useAuth();
+  const { username } = useParams<{ username: string }>();
+  const { fetchThemeByUsername } = useTheme();
+
+  useEffect(() => {
+    if (username) {
+      fetchThemeByUsername(username);
+    }
+  }, [username]);
   
+  const base = `/${username}`;
+
   return (
     <>
       <header style={{ 
@@ -21,7 +32,7 @@ const VisitorLayout: React.FC = () => {
           alignItems: 'center',
           height: '80px'
         }}>
-          <Link to="/" style={{ 
+          <Link to={base} style={{ 
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
@@ -33,10 +44,10 @@ const VisitorLayout: React.FC = () => {
           </Link>
           
           <nav style={{ display: 'flex', gap: 'var(--space-6)', alignItems: 'center' }}>
-            <Link to="/" style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>Home</Link>
-            <Link to="/profile" style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>Profile</Link>
-            <Link to="/products" style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>Products</Link>
-            <Link to="/certificates" style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>Certificates</Link>
+            <Link to={base} style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>Home</Link>
+            <Link to={`${base}/profile`} style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>Profile</Link>
+            <Link to={`${base}/products`} style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>Products</Link>
+            <Link to={`${base}/certificates`} style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>Certificates</Link>
           </nav>
         </div>
       </header>

@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { useTheme } from '../../context/ThemeContext';
 
 interface ProfileData {
+  username: string;
   headline: string;
   about: string;
   careerObjective: string;
@@ -21,6 +22,7 @@ interface ProfileData {
 
 const Profile: React.FC = () => {
   const [profile, setProfile] = useState<ProfileData>({
+    username: '',
     headline: '',
     about: '',
     careerObjective: '',
@@ -53,6 +55,7 @@ const Profile: React.FC = () => {
       const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
       if (data) {
         setProfile({
+          username: data.username || '',
           headline: data.headline || '',
           about: data.about || '',
           careerObjective: data.career_objective || '',
@@ -121,6 +124,7 @@ const Profile: React.FC = () => {
       }
 
       const payload = {
+        username: profile.username,
         headline: profile.headline,
         about: profile.about,
         career_objective: profile.careerObjective,
@@ -219,6 +223,29 @@ const Profile: React.FC = () => {
                 color: 'var(--text-primary)'
               }}
             />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+            <label style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>Username (Your Public Link)</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ color: 'var(--text-tertiary)' }}>domain.com/</span>
+              <input 
+                type="text" 
+                name="username"
+                value={profile.username}
+                onChange={handleChange}
+                style={{ 
+                  flex: 1,
+                  padding: 'var(--space-3)', 
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--border-color)',
+                  backgroundColor: 'rgba(0,0,0,0.2)',
+                  color: 'var(--text-primary)'
+                }}
+                placeholder="e.g. johndoe"
+                required
+              />
+            </div>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>

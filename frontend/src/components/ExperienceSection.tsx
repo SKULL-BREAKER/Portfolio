@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Briefcase } from 'lucide-react';
 
-const ExperienceSection: React.FC = () => {
+const ExperienceSection: React.FC<{ profileId: string }> = ({ profileId }) => {
   const [experiences, setExperiences] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchExperiences = async () => {
       try {
-        const { data, error } = await supabase.from('experience').select('*').order('start_date', { ascending: false });
+        const { data, error } = await supabase.from('experience').select('*').eq('profile_id', profileId).order('start_date', { ascending: false });
         if (data) {
           setExperiences(data.map(d => ({
             ...d, 

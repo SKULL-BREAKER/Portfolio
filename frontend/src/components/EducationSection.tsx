@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { GraduationCap } from 'lucide-react';
 
-const EducationSection: React.FC = () => {
+const EducationSection: React.FC<{ profileId: string }> = ({ profileId }) => {
   const [education, setEducation] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchEducation = async () => {
       try {
-        const { data, error } = await supabase.from('education').select('*').order('start_date', { ascending: false });
+        const { data, error } = await supabase.from('education').select('*').eq('profile_id', profileId).order('start_date', { ascending: false });
         if (data) {
           setEducation(data.map(d => ({
             ...d, 

@@ -20,14 +20,19 @@ import Experience from './pages/owner/Experience';
 import Education from './pages/owner/Education';
 import Links from './pages/owner/Links';
 
+import Landing from './pages/Landing';
+
 function App() {
   return (
     <AuthProvider>
       <ThemeProvider>
         <Router>
           <Routes>
-            {/* Visitor Routes */}
-            <Route path="/" element={<VisitorLayout />}>
+            {/* Landing Route for SaaS Platform */}
+            <Route path="/" element={<Landing />} />
+
+            {/* Visitor Routes (Dynamic by Username) */}
+            <Route path="/:username" element={<VisitorLayout />}>
               <Route index element={<Home />} />
               <Route path="profile" element={<ProfileView />} />
               <Route path="products" element={<ProjectsSection />} />
