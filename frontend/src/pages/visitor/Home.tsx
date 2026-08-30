@@ -126,7 +126,7 @@ const Home: React.FC = () => {
           </p>
           
           <div style={{ display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap' }}>
-            <Link to="/products" className="btn btn-primary" style={{ gap: 'var(--space-2)' }}>
+            <Link to={`/${profile?.username}/products`} className="btn btn-primary" style={{ gap: 'var(--space-2)' }}>
               Explore Products <ArrowRight size={16} />
             </Link>
             {profile?.resumeFile && (

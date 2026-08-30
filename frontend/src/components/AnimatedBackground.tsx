@@ -46,7 +46,7 @@ const AnimatedBackground: React.FC = () => {
     ctx.lineJoin = 'round';
 
     const drawMaze = (w: number, h: number) => {
-      const cellSize = 40;
+      const cellSize = 15;
       const cols = Math.floor(w / cellSize) + 2;
       const rows = Math.floor(h / cellSize) + 2;
 
