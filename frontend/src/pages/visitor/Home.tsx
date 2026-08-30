@@ -140,8 +140,6 @@ const Home: React.FC = () => {
             display: 'flex', 
             gap: 'var(--space-6)', 
             marginTop: 'var(--space-12)',
-            paddingTop: 'var(--space-6)',
-            borderTop: '1px solid var(--border-color)',
             width: '100%',
             flexWrap: 'wrap'
           }}>
